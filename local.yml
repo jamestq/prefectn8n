@@ -12,50 +12,30 @@ services:
     ports:
       - "5678:5678"
 
-  postgres:
-    image: postgres:14
+  prefect:
+    image: prefecthq/prefect:3-latest    
     environment:
-      POSTGRES_USER: prefect
-      POSTGRES_PASSWORD: prefect
-      POSTGRES_DB: prefect
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U prefect"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  prefect-server:
-    image: prefecthq/prefect:3-latest
-    depends_on:
-      postgres:
-        condition: service_healthy            
-    environment:
-      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres:5432/prefect
       PREFECT_SERVER_API_HOST: 0.0.0.0      
-    command: prefect server start --no-services
+    command: prefect server start
+    volumes:
+      - prefect_data:/root/.prefect
     ports:
       - "4200:4200"
-
-  prefect-services:
-    image: prefecthq/prefect:3-latest
-    depends_on:
-      postgres:
-        condition: service_healthy      
-    environment:
-      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres:5432/prefect      
-    command: prefect server services start
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4200/api/health')"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
 
   prefect-worker:
     image: prefecthq/prefect:3-latest
     depends_on:
-      prefect-server:
-        condition: service_started
+      prefect:
+        condition: service_healthy
     environment:
-      PREFECT_API_URL: http://prefect-server:4200/api
+      PREFECT_API_URL: http://prefect:4200/api
     command: prefect worker start --pool local-pool
 
 volumes:  
   n8n_data: {}
-  postgres_data: {}  
+  prefect_data: {}  
