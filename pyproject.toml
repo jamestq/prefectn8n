@@ -6,16 +6,15 @@ authors = [
     {name = "jamestq",email = "james.quang@pm.me"}
 ]
 readme = "README.md"
-requires-python = ">=3.12, <3.14"
-dependencies = [
-    "prefect (>=3.4.15,<4.0.0)",
-    "pandas (>=2.3.2,<3.0.0)"
-]
 
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+prefect = ">=3.4.15,<4.0.0"
+pandas = ">=2.3.2,<3.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-respository = "repository.main:app"
+prefectn8n = "prefectn8n.main:app"
