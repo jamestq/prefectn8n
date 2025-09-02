@@ -1,9 +1,21 @@
 [project]
 name = "prefectn8n"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "prefect>=3.4.15",
+description = ""
+authors = [
+    {name = "jamestq",email = "james.quang@pm.me"}
 ]
+readme = "README.md"
+requires-python = ">=3.12, <3.14"
+dependencies = [
+    "prefect (>=3.4.15,<4.0.0)",
+    "pandas (>=2.3.2,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+respository = "repository.main:app"

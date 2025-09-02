@@ -6,11 +6,8 @@ Deploy locally:
  docker compose -f local.yml up -d
 ```
 
-Install uv package manager: https://github.com/astral-sh/uv
-
-Install deps with uv:
+Install deps with poetry:
 ```
- python -m venv .venv
- source .venv/bin/activate
- uv sync
+ eval $(poetry env activate)
+ poetry install
 ```
