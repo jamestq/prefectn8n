@@ -8,38 +8,15 @@ from prefectn8n.tasks.mods import (
     lowercase_column,
     fill_na
 )
-import yaml
-
-def get_config(config_file: str, flow_name) -> dict:
-    print(f"Using config file: {config_file}")
-    with open(config_file, 'r') as f:
-        config = yaml.safe_load(f)
-        print(f"Config loaded: {config}")
-    if check_valid_flow_name(config, "clean_data"):
-        return config[flow_name]
-    print("No 'clean_data' config found, exiting flow.")
-    return {}
-
-def check_flow_config(config: dict, required_keys: list[str]) -> bool:
-    missing_keys: list[str] = []
-    for key in required_keys:
-        if key not in config:
-            missing_keys.append(key) if key not in config else None
-    if len(missing_keys) > 0:
-        raise ValueError(f"Missing required config keys: {', '.join(missing_keys)}")
-    return True
-
-def check_valid_flow_name(config: dict, flow_name: str) -> bool:
-    return flow_name in config
-
-def get_path(path_str: str) -> Path:
-    return Path(path_str)
-
-def get_save_path(path_str: str) -> Path:
-    path = Path(path_str)
-    if not path.parent.exists():
-        path.parent.mkdir(parents=True, exist_ok=True)
-    return path
+from prefectn8n.tasks.wrangle import (
+    compute_similarity,
+    compute_gotoh_distance
+)
+from prefectn8n.utils.tools import (
+    get_config,
+    get_path,
+    get_save_path,
+)
 
 @flow
 def clean_data(
@@ -88,12 +65,18 @@ def combine_data(
     final_df.to_csv(save_path, index=False)
 
 @flow
-def save_data():
-    utterances = read_data("data/scored_utterances.csv")
-    ref_utterances = read_data("data/referenced_utterances.csv")
-    df = merge_dataframes(utterances, ref_utterances, on="Line", how="inner")
-    df = convert_to_str(df, "ID")
-    df = fill_na(df, "Scored_Transcript", "")
-    df = lowercase_column(df, "Scored_Transcript")
-    df = lowercase_column(df, "Reference_Transcript")   
-    df.to_csv("data/cleaned_utterances.csv", index=False)
+def compute_sim_gotoh(
+    config_file: str = "config.yaml"
+):
+    config = get_config(config_file, "compute_sim_gotoh")  
+    if not config:
+        return      
+    if "path" not in config or "save_path" not in config:
+        raise ValueError("Please provide a valid config with 'path' and 'save_path' key.")
+    dataset = get_path(config["path"])
+    save_path = get_save_path(config["save_path"])    
+    df = read_data(dataset)
+    df["Scored_Transcript"] = df["Scored_Transcript"].fillna("")
+    df = compute_similarity(df)
+    df = compute_gotoh_distance(df)
+    df.to_csv(save_path, index=False)

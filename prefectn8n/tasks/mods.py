@@ -20,7 +20,7 @@ def read_data(file: str | Path) -> pd.DataFrame:
 
 @task
 def merge_dataframes(df_left: pd.DataFrame, df_right: pd.DataFrame, on: str, how: str) -> pd.DataFrame:
-    merged_df = pd.merge(df_left, df_right, on=on, how=how)
+    merged_df = pd.merge(df_left, df_right, on=on, how=how) # type: ignore
     return merged_df
 
 @task
