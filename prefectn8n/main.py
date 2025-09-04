@@ -1,15 +1,16 @@
 from prefectn8n.pipelines.preprocess import (
-    prepare_data,
-    save_data,
-    yet_another_flow
+    clean_data,
+    combine_data,        
 )
+from dotenv import load_dotenv
 from prefect import serve
 
+load_dotenv()
+
 def app():
-    prepare_data_deploy = prepare_data.to_deployment(name="prepare-data")
-    save_data_deploy = save_data.to_deployment(name="save-data")    
-    yet_another_flow_deploy = yet_another_flow.to_deployment(name="yet-another-flow")
-    serve(prepare_data_deploy, save_data_deploy, yet_another_flow_deploy) #type: ignore
+    clean_data_deploy = clean_data.to_deployment(name="clean-data")
+    combine_data_deploy = combine_data.to_deployment(name="combine-data")
+    serve(clean_data_deploy, combine_data_deploy) #type: ignore
 
 if __name__ == "__main__":
     app()

@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 
 @task
-def read_data(file: str) -> pd.DataFrame:
+def read_data(file: str | Path) -> pd.DataFrame:
     file_path = Path(file)
     match file_path.suffix:
         case '.csv':
