@@ -1,4 +1,3 @@
-from fastapi import logger
 from prefect import flow
 from pathlib import Path
 from prefectn8n.tasks.mods import (
@@ -7,10 +6,6 @@ from prefectn8n.tasks.mods import (
     convert_to_str,
     lowercase_column,
     fill_na
-)
-from prefectn8n.tasks.wrangle import (
-    compute_similarity,
-    compute_gotoh_distance
 )
 from prefectn8n.utils.tools import (
     get_config,
@@ -64,19 +59,4 @@ def combine_data(
         final_df = merge_dataframes(final_df, next_df, on=key, how=datasets["how"])
     final_df.to_csv(save_path, index=False)
 
-@flow
-def compute_sim_gotoh(
-    config_file: str = "config.yaml"
-):
-    config = get_config(config_file, "compute_sim_gotoh")  
-    if not config:
-        return      
-    if "path" not in config or "save_path" not in config:
-        raise ValueError("Please provide a valid config with 'path' and 'save_path' key.")
-    dataset = get_path(config["path"])
-    save_path = get_save_path(config["save_path"])    
-    df = read_data(dataset)
-    df["Scored_Transcript"] = df["Scored_Transcript"].fillna("")
-    df = compute_similarity(df)
-    df = compute_gotoh_distance(df)
-    df.to_csv(save_path, index=False)
+
