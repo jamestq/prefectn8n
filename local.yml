@@ -39,3 +39,4 @@ services:
 volumes:  
   n8n_data: {}
   prefect_data: {}  
+    

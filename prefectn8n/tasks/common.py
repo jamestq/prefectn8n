@@ -29,7 +29,16 @@ def convert_to_str(df: pd.DataFrame, column: str) -> pd.DataFrame:
     return df   
 
 @task
-def fill_na(df: pd.DataFrame, column: str, value: str) -> pd.DataFrame:
+def fill_na(df: pd.DataFrame, column: str, method: str = "median") -> pd.DataFrame:
+    match method:
+        case "mean":
+            value = df[column].mean()
+        case "mode":
+            value = df[column].mode()[0]
+        case "zero":
+            value = 0        
+        case _:
+            value = df[column].median()
     df[column] = df[column].fillna(value)
     return df
 

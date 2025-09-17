@@ -1,6 +1,6 @@
 from prefect import flow
 from pathlib import Path
-from prefectn8n.tasks.mods import (
+from prefectn8n.tasks.common import (
     read_data,
     merge_dataframes,
     convert_to_str,
@@ -24,24 +24,57 @@ def clean_data(
         raise ValueError("Please provide a valid config with 'path' and 'save_path' key.")
     dataset = get_path(config["path"])
     save_path = get_save_path(config["save_path"])
-    df = read_data(dataset)
-    if "id" in config:
-        df = convert_to_str(df, config["id"])
+    df = read_data(dataset)            
     if "fillna" in config and type(config["fillna"]) is dict:
-        for col, val in config["fillna"].items():
-            df = fill_na(df, col, val)    
+        for col, method in config["fillna"].items():
+            df = fill_na(df, col, method)    
     if "lowercase" in config and type(config["lowercase"]) is list:
         for col in config["lowercase"]:
             df = lowercase_column(df, col)    
     df.to_csv(Path(save_path), index=False)
 
 @flow
+def display_distribution(
+    config_file: str = "config.yaml"
+):
+    """Display the distribution of values in a specified column of a dataset.
+    
+    Args:
+        config_file (str, optional): Path to the configuration file. Defaults to "config.yaml".
+    
+    """
+    config = get_config(config_file, "display_distribution")      
+    if not config:
+        return      
+    if "path" not in config or "column" not in config:
+        raise ValueError("Please provide a valid config with 'path' and 'column' key.")
+    dataset = get_path(config["path"])
+    column = config["column"]
+    df = read_data(dataset)            
+    if column not in df.columns:
+        raise ValueError(f"Column '{column}' not found in the dataset.")    
+    # Display distribution as a histogram and save to file
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    sns.histplot(data=df, x=column)
+    plt.title(f'Distribution of {column}')
+    plt.xlabel(column)
+    plt.ylabel('Frequency')
+    if "save_path" in config:
+        save_path = get_save_path(config["save_path"])
+        plt.savefig(save_path)
+
+@flow
 def combine_data(
     config_file: str = "config.yaml"
 ):
-    config = get_config(config_file, "combine_data")  
-    if not config:
-        return      
+    """Combine multiple datasets based on a common key.
+    
+    Args:
+        config_file (str, optional): Path to the configuration file. Defaults to "config.yaml".
+    
+    """
+    config = get_config(config_file, "combine_data")      
     if "save_path" not in config:
         raise ValueError("Please provide a valid config with 'save_path' key.") 
     save_path = get_save_path(config["save_path"])

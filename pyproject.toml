@@ -12,6 +12,8 @@ python = ">=3.12,<3.13"
 prefect = ">=3.4.15,<4.0.0"
 pandas = ">=2.3.2,<3.0.0"
 scikit-learn = "^1.7.1"
+matplotlib = "^3.10.6"
+seaborn = "^0.13.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

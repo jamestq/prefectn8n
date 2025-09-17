@@ -1,4 +1,5 @@
 from pathlib import Path
+from rich import print
 import yaml
 
 def get_config(config_file: str, flow_name) -> dict:
@@ -6,10 +7,10 @@ def get_config(config_file: str, flow_name) -> dict:
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
         print(f"Config loaded: {config}")
-    if check_valid_flow_name(config, "clean_data"):
-        return config[flow_name]
-    print("No 'clean_data' config found, exiting flow.")
-    return {}
+    if not check_valid_flow_name(config, "clean_data"):
+        raise ValueError(f"[red]No config found for {flow_name}[/red]. Exiting...")    
+    return config[flow_name]
+    
 
 def check_flow_config(config: dict, required_keys: list[str]) -> bool:
     missing_keys: list[str] = []
